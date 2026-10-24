@@ -1,0 +1,33 @@
+name: MD-Supply-vs-Demand-Agent CI & Evaluation Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Run Unit Test Suite (All 19 Rubric Criteria)
+        run: |
+          pytest -v
+
+      - name: Run Golden Dataset Evaluation Harness
+        run: |
+          python eval/run_evaluation.py

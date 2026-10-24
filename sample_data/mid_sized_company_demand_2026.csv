@@ -1,0 +1,6 @@
+customer_id,region,zone,machine_type,requested_count,workload_tier
+MidMarket-FinTech-GmbH,europe-west3,europe-west3-a,e2-standard-4,8,Non-Production Dev & Staging K8s
+MidMarket-FinTech-GmbH,europe-west3,europe-west3-a,n2-standard-8,14,Production Microservices GKE Cluster (Exceeds Zone-A Supply of 10)
+MidMarket-FinTech-GmbH,europe-west3,europe-west3-b,c3-standard-8,6,Low-Latency Payment API Gateway
+MidMarket-FinTech-GmbH,us-central1,us-central1-a,a2-highgpu-1g,4,GenAI Fraud Model Training (Exceeds Zone-A A100 Supply of 2)
+MidMarket-FinTech-GmbH,europe-west4,europe-west4-a,g2-standard-8,4,LLM Customer Support Inference Serving

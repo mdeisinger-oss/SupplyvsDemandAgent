@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "md-supply-vs-demand-agent"
+version = "1.0.0"
+description = "MD-Supply-vs-Demand-Agent: Freestyle Google Cloud ADK Multi-Agent System for Dynamic First-Come-First-Serve (FCFS) Cloud Compute Capacity Matching, Alternative Recommendation, and Mid-Market FinOps Benchmarking."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "mdeisinger"}
+]
+dependencies = [
+    "pydantic>=2.5.0",
+    "google-adk>=0.1.0",
+    "google-genai>=1.0.0",
+    "google-cloud-secret-manager>=2.18.0",
+    "google-cloud-dlp>=3.14.0",
+    "google-cloud-logging>=3.9.0",
+    "opentelemetry-api>=1.22.0",
+    "opentelemetry-sdk>=1.22.0",
+    "Flask>=3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["md_supply_demand_agent*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

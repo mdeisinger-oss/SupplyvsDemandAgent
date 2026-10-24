@@ -1,0 +1,46 @@
+{
+  "benchmark_reference": "https://spendark.com/blog/cloud-cost-benchmark-2026/",
+  "customer_profile": "Mid-Sized Enterprise ($2.8M/yr Cloud Spend, 50% Compute, 17% AI/GPU)",
+  "demand_requests": [
+    {
+      "customer_id": "MidMarket-FinTech-GmbH",
+      "region": "europe-west3",
+      "zone": "europe-west3-a",
+      "machine_type": "e2-standard-4",
+      "requested_count": 8,
+      "workload_tier": "Non-Production Dev & Staging K8s"
+    },
+    {
+      "customer_id": "MidMarket-FinTech-GmbH",
+      "region": "europe-west3",
+      "zone": "europe-west3-a",
+      "machine_type": "n2-standard-8",
+      "requested_count": 14,
+      "workload_tier": "Production Microservices GKE Cluster"
+    },
+    {
+      "customer_id": "MidMarket-FinTech-GmbH",
+      "region": "europe-west3",
+      "zone": "europe-west3-b",
+      "machine_type": "c3-standard-8",
+      "requested_count": 6,
+      "workload_tier": "Low-Latency Payment API Gateway"
+    },
+    {
+      "customer_id": "MidMarket-FinTech-GmbH",
+      "region": "us-central1",
+      "zone": "us-central1-a",
+      "machine_type": "a2-highgpu-1g",
+      "requested_count": 4,
+      "workload_tier": "GenAI Fraud Model Training"
+    },
+    {
+      "customer_id": "MidMarket-FinTech-GmbH",
+      "region": "europe-west4",
+      "zone": "europe-west4-a",
+      "machine_type": "g2-standard-8",
+      "requested_count": 4,
+      "workload_tier": "LLM Customer Support Inference Serving"
+    }
+  ]
+}

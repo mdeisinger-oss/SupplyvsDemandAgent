@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MD-Supply-vs-Demand-Agent | Google Cloud ADK Capacity &amp; FinOps Console</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-alt: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(90deg, #1e3a8a 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 { margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 10px; }
+    .badge {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid var(--primary);
+      color: #93c5fd;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 24px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .kpi-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .kpi-val { font-size: 1.65rem; font-weight: 700; margin-top: 4px; }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.08rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-box {
+      height: 360px;
+      overflow-y: auto;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .msg {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+    .msg-user {
+      background: #1d4ed8;
+      color: #fff;
+      margin-left: 15%;
+    }
+    .msg-agent {
+      background: #1e293b;
+      border: 1px solid #475569;
+      margin-right: 6%;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"], select {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0b1120;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 15px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--primary-hover); }
+    button.btn-success { background: var(--success); }
+    button.btn-warning { background: var(--warning); color: #0f172a; }
+    button.btn-danger { background: var(--danger); }
+    button.btn-secondary { background: var(--panel-alt); }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .chip {
+      background: #0b1120;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--primary); color: #fff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--muted); font-weight: 600; background: #0b1120; }
+    .alt-card {
+      background: #0b1120;
+      border: 1px solid var(--warning);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .alt-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e293b;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-top: 6px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .table-scroll { max-height: 290px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>
+        ⚡ MD-Supply-vs-Demand-Agent
+        <span class="badge">Freestyle Track • Google ADK Multi-Agent</span>
+        <span class="badge">First-Come-First-Serve (FCFS)</span>
+      </h1>
+      <div style="font-size: 0.82rem; color: var(--muted); margin-top: 4px;">
+        Dynamic Google Cloud Compute Capacity Matching • Grounded in GCP Locations, Machine Families &amp; SpendArk 2026 Mid-Market Benchmark
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-warning" onclick="runSampleMidMarketBatch()">🚀 Run SpendArk 2026 Mid-Sized Company Batch</button>
+      <button class="btn-secondary" onclick="resetStaticSupply()">🔄 Reset Static Supply</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Monitored Supply Pools</div>
+        <div class="kpi-val" id="kpi-pools">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Initial Static Supply (VMs)</div>
+        <div class="kpi-val" id="kpi-initial">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Available Supply (VMs)</div>
+        <div class="kpi-val" id="kpi-avail" style="color: var(--success);">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">FCFS Allocated (VMs)</div>
+        <div class="kpi-val" id="kpi-alloc" style="color: #60a5fa;">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pending HITL Alternatives</div>
+        <div class="kpi-val" id="kpi-hitl" style="color: var(--warning);">0</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <!-- Left Column: Chat Window + File Upload -->
+      <div>
+        <div class="card">
+          <h2>
+            <span>💬 Manual Demand Entry &amp; Interactive Chat Window</span>
+            <input type="text" id="customer-id-input" value="Acme-MidMarket-GmbH" style="max-width: 210px; font-size: 0.8rem; padding: 5px 8px;" title="Customer ID" />
+          </h2>
+          <div class="chat-box" id="chat-box">
+            <div class="msg msg-agent">Welcome to <strong>MD-Supply-vs-Demand-Agent</strong>!
+Enter a Google Cloud capacity request below (or upload a CSV/JSON demand schedule).
+• Allocations follow strict <strong>First-Come-First-Serve (FCFS)</strong> ordering against static regional supply.
+• If supply is exceeded, ranked alternative machine types, shapes, zones, and regions will be recommended for your acceptance.</div>
+          </div>
+          <div class="input-row">
+            <input type="text" id="chat-input" placeholder="e.g., Allocate 14 n2-standard-8 in europe-west3-a for Acme-Corp..." onkeydown="if(event.key==='Enter') sendChat()" />
+            <button onclick="sendChat()">Send Request</button>
+          </div>
+          <div class="chip-row">
+            <span class="chip" onclick="setPrompt('Allocate 6 e2-standard-4 in europe-west3-a for Acme-GmbH')">✅ Standard Request (Fits Supply)</span>
+            <span class="chip" onclick="setPrompt('Allocate 15 n2-standard-8 in europe-west3-a for Acme-GmbH')">⚠️ Exceeds Supply (Triggers Alternatives)</span>
+            <span class="chip" onclick="setPrompt('Allocate 4 a2-highgpu-1g in us-central1-a for GenAI-Labs')">🔥 Exceeds A100 GPU Supply (us-central1-a)</span>
+            <span class="chip" onclick="setPrompt('Accept option 1')">👍 Accept Recommended Option #1</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📂 Upload Customer Demand File (.csv, .json, .jsonl)</h2>
+          <p style="font-size: 0.83rem; color: var(--muted); margin-top: 0;">
+            Upload a batch schedule with columns <code>customer_id,region,zone,machine_type,requested_count</code>.
+          </p>
+          <div class="input-row" style="align-items: center;">
+            <input type="file" id="demand-file-input" accept=".csv,.json,.jsonl" style="color: var(--muted); font-size: 0.85rem;" />
+            <button onclick="uploadDemandFile()">📤 Upload &amp; Match FCFS</button>
+          </div>
+        </div>
+
+        <!-- HITL Pending Alternatives -->
+        <div class="card">
+          <h2>🛡️ Human-in-the-Loop (HITL): Pending Alternative Recommendations</h2>
+          <div id="hitl-container" style="font-size: 0.85rem; color: var(--muted);">
+            No pending supply shortfalls awaiting customer acceptance.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Static Supply Inventory, FCFS Ledger, OTel & Intent/Outcome -->
+      <div>
+        <div class="card">
+          <h2>
+            <span>📦 Static Regional Supply Inventory</span>
+            <select id="region-filter" onchange="refreshState()" style="max-width: 190px; padding: 4px 8px; font-size: 0.8rem;">
+              <option value="europe-west3">europe-west3 (Frankfurt)</option>
+              <option value="europe-west4">europe-west4 (Netherlands)</option>
+              <option value="europe-west1">europe-west1 (Belgium)</option>
+              <option value="us-central1">us-central1 (Iowa)</option>
+              <option value="us-east1">us-east1 (South Carolina)</option>
+              <option value="asia-east1">asia-east1 (Taiwan)</option>
+              <option value="">All Regions</option>
+            </select>
+          </h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Zone</th>
+                  <th>Machine Type</th>
+                  <th>vCPU / RAM</th>
+                  <th>Initial</th>
+                  <th>Available</th>
+                  <th>Allocated</th>
+                  <th>$/hr</th>
+                </tr>
+              </thead>
+              <tbody id="supply-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📜 First-Come-First-Serve (FCFS) Allocation Ledger</h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Seq</th>
+                  <th>Customer</th>
+                  <th>Zone</th>
+                  <th>Machine</th>
+                  <th>Req / Alloc / Short</th>
+                  <th>Mode</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🔍 OpenTelemetry Spans &amp; Intent-vs-Outcome Audit</h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Intent ID</th>
+                  <th>Actor / Action</th>
+                  <th>Outcome Status</th>
+                  <th>Latency</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function appendChatMessage(role, text) {
+      const box = document.getElementById('chat-box');
+      const div = document.createElement('div');
+      div.className = 'msg ' + (role === 'user' ? 'msg-user' : 'msg-agent');
+      div.textContent = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function setPrompt(text) {
+      document.getElementById('chat-input').value = text;
+      document.getElementById('chat-input').focus();
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chat-input');
+      const customerId = document.getElementById('customer-id-input').value || 'Cloud-Customer';
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      appendChatMessage('user', msg);
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: msg, customer_id: customerId })
+      });
+      const data = await res.json();
+      appendChatMessage('agent', data.response_markdown || JSON.stringify(data, null, 2));
+      await refreshState();
+    }
+
+    async function uploadDemandFile() {
+      const fileInput = document.getElementById('demand-file-input');
+      const customerId = document.getElementById('customer-id-input').value || 'MidSized-Customer';
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Please choose a .csv or .json demand file first.');
+        return;
+      }
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('customer_id', customerId);
+
+      appendChatMessage('user', `[Uploaded Demand File: ${file.name}]`);
+      const res = await fetch('/api/upload-demand', { method: 'POST', body: formData });
+      const data = await res.json();
+      appendChatMessage('agent', data.response_markdown || JSON.stringify(data, null, 2));
+      await refreshState();
+    }
+
+    async function runSampleMidMarketBatch() {
+      const sampleCsv = `customer_id,region,zone,machine_type,requested_count,workload_tier
+MidMarket-FinTech-GmbH,europe-west3,europe-west3-a,e2-standard-4,8,Non-Prod Dev K8s
+MidMarket-FinTech-GmbH,europe-west3,europe-west3-a,n2-standard-8,14,Prod GKE Microservices (Exceeds Supply of 10)
+MidMarket-FinTech-GmbH,europe-west3,europe-west3-b,c3-standard-8,6,Low-Latency Payment API
+MidMarket-FinTech-GmbH,us-central1,us-central1-a,a2-highgpu-1g,4,GenAI Training (Exceeds A100 Supply of 2)
+MidMarket-FinTech-GmbH,europe-west4,europe-west4-a,g2-standard-8,4,LLM Inference Serving`;
+
+      appendChatMessage('user', '[Loaded SpendArk 2026 Mid-Sized Company Demand Schedule (5 Tiers)]');
+      const res = await fetch('/api/upload-demand', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          file_content: sampleCsv,
+          file_format: 'csv',
+          customer_id: 'MidMarket-FinTech-GmbH'
+        })
+      });
+      const data = await res.json();
+      appendChatMessage('agent', data.response_markdown || JSON.stringify(data, null, 2));
+      await refreshState();
+    }
+
+    async function acceptProposalOption(proposalId, optionRank) {
+      const customerId = document.getElementById('customer-id-input').value || 'Customer-Operator';
+      const res = await fetch('/api/hitl/accept', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ proposal_id: proposalId, option_rank: optionRank, customer_id: customerId })
+      });
+      const data = await res.json();
+      if (data.status === 'SUCCESS') {
+        const alt = data.accepted_alternative;
+        const alloc = data.allocation_result;
+        appendChatMessage(
+          'agent',
+          `✅ Accepted Proposal ${proposalId} (Option #${optionRank}): Allocated ${alloc.allocated_count}x ${alt.machine_type} in ${alt.zone} (${alt.region}) [FCFS Seq #${alloc.fcfs_sequence_number}].`
+        );
+      } else {
+        appendChatMessage('agent', `⚠️ Error accepting alternative: ${data.message}`);
+      }
+      await refreshState();
+    }
+
+    async function rejectProposal(proposalId) {
+      await fetch('/api/hitl/reject', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ proposal_id: proposalId })
+      });
+      appendChatMessage('agent', `❌ Customer declined alternative proposal ${proposalId}.`);
+      await refreshState();
+    }
+
+    async function resetStaticSupply() {
+      await fetch('/api/reset-supply', { method: 'POST' });
+      appendChatMessage('agent', '🔄 Static regional supply inventory and FCFS ledger have been reset to initial baseline.');
+      await refreshState();
+    }
+
+    async function refreshState() {
+      const region = document.getElementById('region-filter').value;
+      const res = await fetch('/api/state?region=' + encodeURIComponent(region));
+      const data = await res.json();
+
+      document.getElementById('kpi-pools').textContent = data.summary_kpis.total_pools;
+      document.getElementById('kpi-initial').textContent = data.summary_kpis.total_initial_supply;
+      document.getElementById('kpi-avail').textContent = data.summary_kpis.total_available_supply;
+      document.getElementById('kpi-alloc').textContent = data.summary_kpis.total_allocated_supply;
+      document.getElementById('kpi-hitl').textContent = data.summary_kpis.pending_alternatives_count;
+
+      const sBody = document.getElementById('supply-tbody');
+      sBody.innerHTML = '';
+      for (const p of data.supply_pools) {
+        const tr = document.createElement('tr');
+        const availColor = p.available_supply === 0 ? 'var(--danger)' : (p.available_supply <= 3 ? 'var(--warning)' : 'var(--success)');
+        tr.innerHTML = `
+          <td><code>${p.zone}</code></td>
+          <td><strong>${p.machine_type}</strong> <span style="color:var(--muted);font-size:0.75rem;">(${p.family})</span></td>
+          <td>${p.vcpus} vCPU / ${p.memory_gb}GB${p.gpus ? ' / ' + p.gpus + ' GPU' : ''}</td>
+          <td>${p.initial_supply}</td>
+          <td style="color:${availColor};font-weight:700;">${p.available_supply}</td>
+          <td>${p.allocated_supply}</td>
+          <td>$${p.hourly_price_usd.toFixed(3)}</td>
+        `;
+        sBody.appendChild(tr);
+      }
+
+      const lBody = document.getElementById('ledger-tbody');
+      lBody.innerHTML = '';
+      for (const l of data.fcfs_ledger) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>#${l.sequence_id}</strong></td>
+          <td>${l.customer_id}</td>
+          <td><code>${l.zone}</code></td>
+          <td><code>${l.machine_type}</code></td>
+          <td>${l.requested_count} / <strong style="color:var(--success)">${l.allocated_count}</strong> / <strong style="color:${l.shortfall_count > 0 ? 'var(--warning)' : 'var(--muted)'}">${l.shortfall_count}</strong></td>
+          <td><span style="font-size:0.75rem;">${l.allocation_mode}</span></td>
+        `;
+        lBody.appendChild(tr);
+      }
+
+      const hitlBox = document.getElementById('hitl-container');
+      if (!data.pending_confirmations || data.pending_confirmations.length === 0) {
+        hitlBox.innerHTML = 'No pending supply shortfalls awaiting customer acceptance.';
+      } else {
+        hitlBox.innerHTML = '';
+        for (const prop of data.pending_confirmations) {
+          const card = document.createElement('div');
+          card.className = 'alt-card';
+          let optsHtml = '';
+          for (const alt of (prop.alternatives || []).slice(0, 3)) {
+            optsHtml += `
+              <div class="alt-option">
+                <div>
+                  <strong>Option #${alt.option_rank} (${alt.strategy_type})</strong>:
+                  <code>${alt.recommended_count}x ${alt.machine_type}</code> in <code>${alt.zone}</code> (${alt.region})
+                  — Pool Avail: <strong>${alt.available_supply_in_pool}</strong> | $${alt.hourly_cost_usd.toFixed(2)}/hr (${alt.cost_delta_pct >= 0 ? '+' : ''}${alt.cost_delta_pct}%)
+                </div>
+                <button class="btn-success" onclick="acceptProposalOption('${prop.proposal_id}', ${alt.option_rank})">
+                  ✅ Accept Option #${alt.option_rank}
+                </button>
+              </div>
+            `;
+          }
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <strong>Proposal <code>${prop.proposal_id}</code></strong> (${prop.customer_id}) —
+                Shortfall of <strong>${prop.shortfall_count}x <code>${prop.original_machine_type}</code></strong> in <code>${prop.original_zone}</code>
+              </div>
+              <button class="btn-danger" style="padding:4px 10px;font-size:0.76rem;" onclick="rejectProposal('${prop.proposal_id}')">Decline</button>
+            </div>
+            ${optsHtml}
+          `;
+          hitlBox.appendChild(card);
+        }
+      }
+
+      const aBody = document.getElementById('audit-tbody');
+      aBody.innerHTML = '';
+      for (const a of data.intent_vs_outcome_audit) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${a.intent_id}</code></td>
+          <td><strong>${a.actor}</strong>: ${a.intended_action}</td>
+          <td><code>${a.actual_status}</code></td>
+          <td>${a.latency_ms}ms</td>
+        `;
+        aBody.appendChild(tr);
+      }
+    }
+
+    refreshState();
+  </script>
+</body>
+</html>
