@@ -195,8 +195,19 @@ try:
         return jsonify(global_session_store.reset_static_supply_inventory()), 200
 
 except ImportError:
-    from http.server import BaseHTTPRequestHandler, HTTPServer
+    import socket
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from urllib.parse import parse_qs, urlparse
+
+    class _DualStackHTTPServer(ThreadingHTTPServer):
+        address_family = socket.AF_INET6
+
+        def server_bind(self) -> None:
+            try:
+                self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+            except Exception:
+                pass
+            super().server_bind()
 
     class _MockResponse:
         def __init__(self, body: Dict[str, Any], status_code: int) -> None:
@@ -266,8 +277,12 @@ except ImportError:
                     self.end_headers()
                     self.wfile.write(json.dumps(resp.get_json()).encode("utf-8"))
 
-            server = HTTPServer((host, port), Handler)
-            print(f"Serving MD-Supply-vs-Demand-Agent Web UI on http://{host}:{port}")
+            try:
+                server = _DualStackHTTPServer(("::", port), Handler)
+                print(f"Serving MD-Supply-vs-Demand-Agent Web UI (dual-stack IPv6/IPv4) on http://[::]:{port}")
+            except Exception:
+                server = ThreadingHTTPServer((host, port), Handler)
+                print(f"Serving MD-Supply-vs-Demand-Agent Web UI on http://{host}:{port}")
             server.serve_forever()
 
     app = _StdlibWebApp()  # type: ignore

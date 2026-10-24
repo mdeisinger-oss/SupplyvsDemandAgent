@@ -393,12 +393,21 @@ Enter a Google Cloud capacity request below (or upload a CSV/JSON demand schedul
         return;
       }
       const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('customer_id', customerId);
+      const fileText = await file.text();
+      const fmt = file.name.toLowerCase().endsWith('.jsonl')
+        ? 'jsonl'
+        : (file.name.toLowerCase().endsWith('.json') ? 'json' : 'csv');
 
       appendChatMessage('user', `[Uploaded Demand File: ${file.name}]`);
-      const res = await fetch('/api/upload-demand', { method: 'POST', body: formData });
+      const res = await fetch('/api/upload-demand', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          file_content: fileText,
+          file_format: fmt,
+          customer_id: customerId
+        })
+      });
       const data = await res.json();
       appendChatMessage('agent', data.response_markdown || JSON.stringify(data, null, 2));
       await refreshState();
